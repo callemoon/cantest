@@ -43,6 +43,8 @@ int main(int argc, char**argv)
 		}
 	}
 
+	usleep(1000000);
+
 	wrapper.Close();
 
 	return 0;
