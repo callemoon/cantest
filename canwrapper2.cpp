@@ -1,48 +1,54 @@
 // Copyright 2012 CrossControl
 
 #include "canwrapper.h"
+#include <stdio.h>
 
 
-int main(int argc, char**argv)
+int main(int argc, char** argv)
 {
 	struct can_frame msg;
 
-	int bus;
 	int i = 0;
-	int err;
 	CanWrapper wrapper;
+	bool extended, rtr, err;
+	int errCode;
+	struct timeval time;
+	int ok = 0;
+	int fail = 0;
 
-	wrapper.Init(argv[1], err);
-
-	if(!strcmp(argv[1], "can0"))
-	{
-		bus = 0;
-	}
+	wrapper.Init(argv[1], errCode);
 
 	while(i < 10000000)
 	{
-		msg.can_id = i;
-		msg.data[0] = i;
-		msg.data[1] = i >> 8;
-		msg.data[2] = i >> 16;
-		msg.data[3] = i >> 24;
-		msg.data[4] = i;
-		msg.data[5] = i >> 8;
-		msg.data[6] = i >> 16;
-		msg.data[7] = i >> 24;
-
-		msg.len = 8;
-
-		if(wrapper.SendMsg(msg, true, false, err))
+		if(wrapper.GetMsg(msg, extended, rtr, err, errCode, time))
 		{
-			i++;
-		}
-		else
-		{
-			usleep(100);	// buffer full, do some sleep
+			if(
+			(msg.can_id == i) &&
+			(msg.data[0] == (i & 0xFF)) &&
+			(msg.data[1] == ((i >> 8) & 0xFF)) &&
+			(msg.data[2] == ((i >> 16) & 0xFF)) &&
+			(msg.data[3] == ((i >> 24) & 0xFF)) &&
+			(msg.data[4] == (i & 0xFF)) &&
+			(msg.data[5] == ((i >> 8) & 0xFF)) &&
+			(msg.data[6] == ((i >> 16) & 0xFF)) &&
+			(msg.data[7] == ((i >> 24) & 0xFF))
+			)
+			{
+				ok++;
+				i++;
+			}
+			else
+			{
+				fail++;
+
+				// reset i
+				i = msg.data[0] + (msg.data[1] << 8) + (msg.data[2] << 16) + (msg.data[3] << 24);
+				i++;
+			}
+			printf("%d %d\r\n", ok, fail);
 		}
 	}
-
+	
 	wrapper.Close();
 
 	return 0;
@@ -97,13 +103,9 @@ bool CanWrapper::Init(const char *interfaceName, int &errorCode)
         return false;
     }
 
-   const int loopback = 0;
+    m_initialized = true;
 
-   setsockopt(m_socket, SOL_CAN_RAW, CAN_RAW_LOOPBACK, &loopback, sizeof(loopback));
-
-   m_initialized = true;
-
-   return true;
+    return true;
 }
 
 // Close an open connection. Use when changing can net.
