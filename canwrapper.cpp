@@ -14,7 +14,7 @@ int main(int argc, char**argv)
 
 	wrapper.Init(argv[1], err);
 
-	if(!strcmp(argv[1], "can0"))
+	if(!strcmp(argv[2], "1"))
 	{
 		i = 1;
 	}
