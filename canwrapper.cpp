@@ -16,7 +16,7 @@ int main(int argc, char**argv)
 
 	if(!strcmp(argv[1], "can0"))
 	{
-		bus = 0;
+		i = 1;
 	}
 
 	while(i < 10000000)
@@ -35,7 +35,7 @@ int main(int argc, char**argv)
 
 		if(wrapper.SendMsg(msg, true, false, err))
 		{
-			i++;
+			i+=2;
 		}
 		else
 		{

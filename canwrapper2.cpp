@@ -35,7 +35,7 @@ int main(int argc, char** argv)
 			)
 			{
 				ok++;
-				i++;
+				i+=2;
 			}
 			else
 			{
@@ -43,7 +43,7 @@ int main(int argc, char** argv)
 
 				// reset i
 				i = msg.data[0] + (msg.data[1] << 8) + (msg.data[2] << 16) + (msg.data[3] << 24);
-				i++;
+				i+=2;
 			}
 			printf("%d %d\r\n", ok, fail);
 		}
