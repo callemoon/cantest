@@ -2,56 +2,6 @@
 
 #include "canwrapper.h"
 
-
-int main(int argc, char**argv)
-{
-	struct can_frame msg;
-
-	int bus;
-	int i = 0;
-	int err;
-	CanWrapper wrapper;
-
-	wrapper.Init(argv[1], err);
-
-	if(!strcmp(argv[2], "1"))
-	{
-		i = 1;
-	}
-
-	while(i < 10000000)
-	{
-		msg.can_id = i;
-		msg.data[0] = i;
-		msg.data[1] = i >> 8;
-		msg.data[2] = i >> 16;
-		msg.data[3] = i >> 24;
-		msg.data[4] = i;
-		msg.data[5] = i >> 8;
-		msg.data[6] = i >> 16;
-		msg.data[7] = i >> 24;
-
-		msg.len = 8;
-
-		if(wrapper.SendMsg(msg, true, false, err))
-		{
-			i+=2;
-		}
-		else
-		{
-			usleep(100);	// buffer full, do some sleep
-		}
-	}
-
-	usleep(1000000);
-
-	wrapper.Close();
-
-	return 0;
-}
-
-
-
 #define INVALID_SOCKET -1
 
 CanWrapper::CanWrapper()
