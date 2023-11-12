@@ -12,7 +12,7 @@ int main(int argc, char**argv)
 	int err;
 	CanWrapper can;
 
-    if(argc != 2)
+    if(argc != 3)
     {
         printf("usage: cansend canbus channel\r\n");
 
