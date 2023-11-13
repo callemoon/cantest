@@ -3,7 +3,7 @@
 
 #define TX_MESSAGES    5000000
 
-int main(int argc, char**argv)
+int cansend(int argc, char**argv)
 {
 	struct can_frame msg;
 
@@ -12,16 +12,16 @@ int main(int argc, char**argv)
 	int err;
 	CanWrapper can;
 
-    if(argc != 3)
+    if(argc != 4)
     {
         printf("usage: cansend canbus channel\r\n");
 
         return 0;
     }
 
-	can.Init(argv[1], err);
+	can.Init(argv[2], err);
 
-	if(!strcmp(argv[2], "1"))
+	if(!strcmp(argv[3], "1"))
 	{
 		i = 1;
 	}
@@ -38,7 +38,7 @@ int main(int argc, char**argv)
 		msg.data[6] = i >> 16;
 		msg.data[7] = i >> 24;
 
-		msg.len = 8;
+		msg.can_dlc = 8;
 
 		if(can.SendMsg(msg, true, false, err))
 		{
