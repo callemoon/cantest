@@ -1,26 +1,35 @@
-appname := myapp
+#
+# Makefile for DMCU module
+#
 
-CXX := g++
-CXXFLAGS := -Wall -g
+target = cantest
 
-srcfiles := $(shell find . -maxdepth 1 -name "*.cpp")
-objects  := $(patsubst %.cpp, %.o, $(srcfiles))
+obj-m += $(target).o
+$(target)-objs := canrec.o cansend.o canwrapper.o
 
-all: $(appname)
+SRC := $(shell pwd)
 
-$(appname): $(objects)
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $(appname) $(objects) $(LDLIBS)
+#
+# Compile module -rule
+#
+module:
+	KCPPFLAGS="-DDRV_VERSION=\"\"$(DRV_VERSION)\"\"" $(MAKE) V=2 -C ${KERNEL_DIR}  M=$(SRC) modules 
 
-depend: .depend
+#
+# Module install -rule
+# 
+modules_install:
+	$(MAKE) -C $(KERNEL_DIR) M=$(SRC) modules_install
 
-.depend: $(srcfiles)
-	rm -f ./.depend
-	$(CXX) $(CXXFLAGS) -MM $^>>./.depend;
+#
+# Default - rule
+#
+all: version_info module
 
+#
+# Clean - rule
+#
 clean:
-	rm -f $(objects)
+	rm -rf modules.order .tmp_versions Module.symvers *.mod.c *.o *.ko .*.cmd *~ 
 
-dist-clean: clean
-	rm -f *~ .depend
 
-include .depend
