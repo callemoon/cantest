@@ -1,57 +1,65 @@
 #include "canwrapper.h"
 #include <stdio.h>
 
-#define TX_MESSAGES    5000000
+#define TX_MESSAGES 5000000
 
-int cansend(int argc, char**argv)
+int cansend(int argc, char **argv)
 {
-	struct can_frame msg;
+    CanWrapper can;
+    struct can_frame msg;
+    int messagesSent = 0;
+    int err;
+    int canid = 0;
 
-	int i = 0;
-	int err;
-	CanWrapper can;
-
-    if(argc != 4)
+    if (argc != 4)
     {
-        printf("usage: cansend canbus channel\r\n");
+        printf("usage: %s send [canbus] [channel]\r\n", argv[0]);
 
         return 0;
     }
 
-	can.Init(argv[2], err);
+    if (!can.Init(argv[2], err))
+    {
+        printf("can init failed with code %d (%s)\r\n", err, argv[2]);
 
-	if(!strcmp(argv[3], "1"))
-	{
-		i = 1;
-	}
+        return 0;
+    }
 
-	while(i < (TX_MESSAGES * 2))
-	{
-		msg.can_id = i;
-		msg.data[0] = i;
-		msg.data[1] = i >> 8;
-		msg.data[2] = i >> 16;
-		msg.data[3] = i >> 24;
-		msg.data[4] = i;
-		msg.data[5] = i >> 8;
-		msg.data[6] = i >> 16;
-		msg.data[7] = i >> 24;
+    can.DisableEcho();
 
-		msg.can_dlc = 8;
+    if (!strcmp(argv[3], "1"))
+    {
+        canid = 1;
+    }
 
-		if(can.SendMsg(msg, true, false, err))
-		{
-			i+=2;
-		}
-		else
-		{
-			usleep(100);	// buffer full, sleep
-		}
-	}
+    while (messagesSent < TX_MESSAGES)
+    {
+        msg.can_id = canid;
+        msg.data[0] = canid;
+        msg.data[1] = canid >> 8;
+        msg.data[2] = canid >> 16;
+        msg.data[3] = canid >> 24;
+        msg.data[4] = canid;
+        msg.data[5] = canid >> 8;
+        msg.data[6] = canid >> 16;
+        msg.data[7] = canid >> 24;
 
-	usleep(1000000);
+        msg.can_dlc = 8;
 
-	can.Close();
+        if (can.SendMsg(msg, true, false, err))
+        {
+            messagesSent++;
+            canid += 2;
+        }
+        else
+        {
+            usleep(100); // buffer full, sleep
+        }
+    }
 
-	return 0;
+    usleep(1000000);
+
+    can.Close();
+
+    return 0;
 }

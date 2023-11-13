@@ -1,4 +1,5 @@
 #include <string.h>
+#include <stdio.h>
 
 
 extern int cansend(int argc, char**argv);
@@ -6,16 +7,26 @@ extern int canrec(int argc, char**argv);
 
 int main(int argc, char**argv)
 {
+    if(argc < 2)
+    {
+        printf("usage: %s [rec|send] [canbus] [channel]\r\n", argv[0]);
 
-	if(!strcmp(argv[1], "rec"))
-	{
-		canrec(argc, argv);
-	}
-	
-	if(!strcmp(argv[1], "send"))
-	{
-		cansend(argc, argv);
-	}
+        return 0;
+    }
 
-	return 0;
+    if(!strcmp(argv[1], "rec"))
+    {
+        canrec(argc, argv);
+    }
+    else
+    if(!strcmp(argv[1], "send"))
+    {
+        cansend(argc, argv);
+    }
+    else
+    {
+        printf("usage: %s [rec|send] [canbus] [channel]\r\n", argv[0]);
+    }
+
+    return 0;
 }

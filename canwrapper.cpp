@@ -49,10 +49,6 @@ bool CanWrapper::Init(const char *interfaceName, int &errorCode)
         return false;
     }
 
-   const int loopback = 0;
-
-   setsockopt(m_socket, SOL_CAN_RAW, CAN_RAW_LOOPBACK, &loopback, sizeof(loopback));
-
    m_initialized = true;
 
    return true;
@@ -238,4 +234,11 @@ void CanWrapper::EnableErrorMessages()
 
     setsockopt(m_socket, SOL_CAN_RAW, CAN_RAW_ERR_FILTER,
                &err_mask, sizeof(err_mask));
+}
+
+void CanWrapper::DisableEcho()
+{
+   const int loopback = 0;
+
+   setsockopt(m_socket, SOL_CAN_RAW, CAN_RAW_LOOPBACK, &loopback, sizeof(loopback));
 }

@@ -5,30 +5,21 @@
 
 #include <unistd.h>
 #include <string.h>
-
+#include <stdio.h>
+#include <assert.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <signal.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/ioctl.h>
 #include <sys/uio.h>
+#include <sys/time.h>
+#include <sys/select.h>
 #include <net/if.h>
 #include <linux/can.h>
 #include <linux/can/raw.h>
-
-#include <assert.h>
-
-#include <errno.h>
-
-#include <fcntl.h>
-
-#include <stdio.h>
-
-#include <signal.h>
-
 #include <linux/can/error.h>
-
-#include <sys/time.h>
-
-#include <sys/select.h>
 
 class CanWrapper
 {
@@ -47,12 +38,12 @@ public:
 
     void EnableErrorMessages();
 
+    void DisableEcho();
+
 private:
     bool m_initialized; // indicates if socket is initialized
 
     int m_socket;       // Socket
-
-
 };
 
 #endif // CANWRAPPER_H
