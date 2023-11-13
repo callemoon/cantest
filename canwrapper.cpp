@@ -234,10 +234,8 @@ bool CanWrapper::SetRecvBufferSize(int size)
 // see /linux/can/error.h for more options regading error handling (not implemented in this class).
 void CanWrapper::EnableErrorMessages()
 {
-    int ret;
-
     can_err_mask_t err_mask = ( CAN_ERR_TX_TIMEOUT | CAN_ERR_BUSOFF );
 
-    ret = setsockopt(m_socket, SOL_CAN_RAW, CAN_RAW_ERR_FILTER,
+    setsockopt(m_socket, SOL_CAN_RAW, CAN_RAW_ERR_FILTER,
                &err_mask, sizeof(err_mask));
 }
