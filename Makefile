@@ -1,35 +1,23 @@
-#
-# Makefile for DMCU module
-#
+LXX = $(CXX)
 
-target = cantest
+INCDIR+= -I.
 
-obj-m += $(target).o
-$(target)-objs := canrec.o cansend.o canwrapper.o
 
-SRC := $(shell pwd)
+LXXFLAGS+=
 
-#
-# Compile module -rule
-#
-module:
-	KCPPFLAGS="-DDRV_VERSION=\"\"$(DRV_VERSION)\"\"" $(MAKE) V=2 -C ${KERNEL_DIR}  M=$(SRC) modules 
+CXXFLAGS+= -O2 -g -Wall -Werror $(INCDIR) -DLINUX
 
-#
-# Module install -rule
-# 
-modules_install:
-	$(MAKE) -C $(KERNEL_DIR) M=$(SRC) modules_install
+OBJS = \
+main.o \
+cansend.o \
+canrec.o \
+canwrapper.o \
 
-#
-# Default - rule
-#
-all: version_info module
+all:  cantest
 
-#
-# Clean - rule
-#
+# Actual application
+cantest: $(OBJS)
+	$(LXX) $(CXXFLAGS) $(OBJS) $(LXXFLAGS) -o $@
+
 clean:
-	rm -rf modules.order .tmp_versions Module.symvers *.mod.c *.o *.ko .*.cmd *~ 
-
-
+	rm -rf cantest *.o .depend
