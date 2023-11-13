@@ -7,7 +7,6 @@ int cansend(int argc, char**argv)
 {
 	struct can_frame msg;
 
-	int bus;
 	int i = 0;
 	int err;
 	CanWrapper can;
