@@ -13,7 +13,7 @@ int canrec(int argc, char **argv)
     struct timeval timeout;
     int pass = 0;
     int fail = 0;
-    int printFrame = 10;
+    int printFrame = 100;
     int receivedMessages = 0;
 
     timeout.tv_sec = 1;
@@ -39,38 +39,45 @@ int canrec(int argc, char **argv)
     {
         if (can.GetMsg(msg, extended, rtr, err, errCode, timeout))
         {
-            if ((msg.can_id == expectedId) &&
-                (msg.can_dlc == 8) &&
-                (msg.data[0] == (expectedId & 0xFF)) &&
-                (msg.data[1] == ((expectedId >> 8) & 0xFF)) &&
-                (msg.data[2] == ((expectedId >> 16) & 0xFF)) &&
-                (msg.data[3] == ((expectedId >> 24) & 0xFF)) &&
-                (msg.data[4] == (expectedId & 0xFF)) &&
-                (msg.data[5] == ((expectedId >> 8) & 0xFF)) &&
-                (msg.data[6] == ((expectedId >> 16) & 0xFF)) &&
-                (msg.data[7] == ((expectedId >> 24) & 0xFF)))
+            if(err)
             {
-                receivedMessages++;
-                pass++;
-                expectedId += 2;
+                printf("error frame received\r\n");
             }
             else
             {
-                fail++;
+                if ((msg.can_id == expectedId) &&
+                    (msg.can_dlc == 8) &&
+                    (msg.data[0] == (expectedId & 0xFF)) &&
+                    (msg.data[1] == ((expectedId >> 8) & 0xFF)) &&
+                    (msg.data[2] == ((expectedId >> 16) & 0xFF)) &&
+                    (msg.data[3] == ((expectedId >> 24) & 0xFF)) &&
+                    (msg.data[4] == (expectedId & 0xFF)) &&
+                    (msg.data[5] == ((expectedId >> 8) & 0xFF)) &&
+                    (msg.data[6] == ((expectedId >> 16) & 0xFF)) &&
+                    (msg.data[7] == ((expectedId >> 24) & 0xFF)))
+                {
+                    receivedMessages++;
+                    pass++;
+                    expectedId += 2;
+                }
+                else
+                {
+                    fail++;
 
-                printf("unexpected frame received id:%d len:%d data:%d %d %d %d %d %d %d %d\r\n",
-                       msg.can_id, msg.can_dlc,
-                       msg.data[0], msg.data[1], msg.data[2], msg.data[3],
-                       msg.data[4], msg.data[5], msg.data[6], msg.data[7]);
+                    printf("unexpected frame received id:%d len:%d data:%d %d %d %d %d %d %d %d\r\n",
+                        msg.can_id, msg.can_dlc,
+                        msg.data[0], msg.data[1], msg.data[2], msg.data[3],
+                        msg.data[4], msg.data[5], msg.data[6], msg.data[7]);
 
-                // resync expectedId
-                expectedId = msg.data[0] + (msg.data[1] << 8) + (msg.data[2] << 16) + (msg.data[3] << 24);
-                expectedId += 2;
-            }
+                    // resync expectedId
+                    expectedId = msg.data[0] + (msg.data[1] << 8) + (msg.data[2] << 16) + (msg.data[3] << 24);
+                    expectedId += 2;
+                }
 
-            if ((receivedMessages % printFrame) == 0)
-            {
-                printf("%d %d\r\n", pass, fail);
+                if ((receivedMessages % printFrame) == 0)
+                {
+                    printf("%d %d\r\n", pass, fail);
+                }
             }
         }
     }
