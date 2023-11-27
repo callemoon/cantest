@@ -9,13 +9,15 @@ int canecho(int argc, char **argv)
     CanWrapper can;
     struct can_frame msg;
     int messagesSent = 0;
-    int canid = 0;
+    int canid;
     bool extended, rtr;
     int errCode;
     bool err2;
     struct timeval timeout;
-    unsigned int expectedId = 0;
-    bool startSend = 0;
+    unsigned int expectedId;
+    bool sendRequest;
+    int failures = 0;
+    int pass = 0;
 
     timeout.tv_sec = 3;
     timeout.tv_usec = 0;
@@ -38,17 +40,21 @@ int canecho(int argc, char **argv)
 
     if (!strcmp(argv[3], "0"))
     {
-        startSend = 1;
+        canid = 0;
+        sendRequest = 1;
         expectedId = 0;
     }
     else
     {
-        canid = 1;    
+        canid = 1;  
+        sendRequest = 0; 
+        expectedId = 0; 
     }
 
     while(1)
     {
-        if(startSend)
+        // send a request frame
+        if(sendRequest)
         {
             msg.can_id = canid;
             msg.data[0] = canid;
@@ -69,9 +75,13 @@ int canecho(int argc, char **argv)
                 messagesSent++;
                 canid += 2;
             }
+            else
+            {
+                printf("could not send message\r\n");
+            }
         }
 
-        // expect the other side to answer
+        // wait for answer
         if (can.GetMsg(msg, extended, rtr, err2, errCode, timeout))
         {
             if(err2)
@@ -91,14 +101,17 @@ int canecho(int argc, char **argv)
                     (msg.data[6] == ((expectedId >> 16) & 0xFF)) &&
                     (msg.data[7] == ((expectedId >> 24) & 0xFF)))
                 {
-                    printf("ok %d\n", messagesSent);
+                    pass++;
                 }
                 else
                 {
+                    failures++;
                     printf("unexpected frame\n");
                 }
+
+                printf("%d %d\n", pass, failures);
             }
-            startSend = 1;
+            sendRequest = 1;
         }
     }    
 }
