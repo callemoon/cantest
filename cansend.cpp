@@ -14,7 +14,7 @@ int canecho(int argc, char **argv)
     int errCode;
     bool err2;
     struct timeval timeout;
-    unsigned int expectedId;
+    unsigned int expectedId = 0;
     bool startSend = 0;
 
     timeout.tv_sec = 3;
@@ -40,6 +40,10 @@ int canecho(int argc, char **argv)
     {
         startSend = 1;
         expectedId = 0;
+    }
+    else
+    {
+        canid = 1;    
     }
 
     while(1)
