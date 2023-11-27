@@ -3,6 +3,98 @@
 
 #define TX_MESSAGES 5000000
 
+
+int canecho(int argc, char **argv)
+{
+    CanWrapper can;
+    struct can_frame msg;
+    int messagesSent = 0;
+    int canid = 0;
+    bool extended, rtr;
+    int errCode;
+    bool err2;
+    struct timeval timeout;
+    unsigned int expectedId;
+    bool startSend;
+
+    timeout.tv_sec = 3;
+    timeout.tv_usec = 0;
+
+    if (argc != 4)
+    {
+        printf("usage: %s echo [canbus]\r\n", argv[0]);
+
+        return 0;
+    }
+
+    if (!can.Init(argv[2], errCode))
+    {
+        printf("can init failed with code %d (%s)\r\n", errCode, argv[2]);
+
+        return 0;
+    }
+
+    can.DisableEcho();
+
+    if (!strcmp(argv[3], "0"))
+    {
+        startSend = 1;
+        expectedId = 0;
+    }
+
+    while(1)
+    {
+        if(startSend)
+        {
+            msg.can_id = canid;
+            msg.data[0] = canid;
+            msg.data[1] = canid >> 8;
+            msg.data[2] = canid >> 16;
+            msg.data[3] = canid >> 24;
+            msg.data[4] = canid;
+            msg.data[5] = canid >> 8;
+            msg.data[6] = canid >> 16;
+            msg.data[7] = canid >> 24;
+
+            msg.can_dlc = 8;
+
+            if (can.SendMsg(msg, true, false, errCode))
+            {
+                messagesSent++;
+                canid += 2;
+            }
+
+            expectedId = (canid + 1);
+            startSend = 0;
+        }
+
+        // expect the other side to answer
+        if (can.GetMsg(msg, extended, rtr, err2, errCode, timeout))
+        {
+            if(err2)
+            {
+                printf("error frame received\r\n");
+            }
+            else
+            {
+                if ((msg.can_id == expectedId) &&
+                    (msg.can_dlc == 8) &&
+                    (msg.data[0] == (expectedId & 0xFF)) &&
+                    (msg.data[1] == ((expectedId >> 8) & 0xFF)) &&
+                    (msg.data[2] == ((expectedId >> 16) & 0xFF)) &&
+                    (msg.data[3] == ((expectedId >> 24) & 0xFF)) &&
+                    (msg.data[4] == (expectedId & 0xFF)) &&
+                    (msg.data[5] == ((expectedId >> 8) & 0xFF)) &&
+                    (msg.data[6] == ((expectedId >> 16) & 0xFF)) &&
+                    (msg.data[7] == ((expectedId >> 24) & 0xFF)))
+                {
+                    printf("ok %d\n", messagesSent);
+                }
+            }
+        }
+    }    
+}
+
 int canburst(int argc, char **argv)
 {
     CanWrapper can;
