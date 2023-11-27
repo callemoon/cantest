@@ -15,14 +15,14 @@ int canecho(int argc, char **argv)
     bool err2;
     struct timeval timeout;
     unsigned int expectedId;
-    bool startSend;
+    bool startSend = 0;
 
     timeout.tv_sec = 3;
     timeout.tv_usec = 0;
 
     if (argc != 4)
     {
-        printf("usage: %s echo [canbus]\r\n", argv[0]);
+        printf("usage: %s echo [canbus] [channel]\r\n", argv[0]);
 
         return 0;
     }
@@ -58,14 +58,13 @@ int canecho(int argc, char **argv)
 
             msg.can_dlc = 8;
 
+            expectedId = (canid + 1);
+
             if (can.SendMsg(msg, true, false, errCode))
             {
                 messagesSent++;
                 canid += 2;
             }
-
-            expectedId = (canid + 1);
-            startSend = 0;
         }
 
         // expect the other side to answer
@@ -90,7 +89,12 @@ int canecho(int argc, char **argv)
                 {
                     printf("ok %d\n", messagesSent);
                 }
+                else
+                {
+                    printf("unexpected frame\n");
+                }
             }
+            startSend = 1;
         }
     }    
 }
