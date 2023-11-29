@@ -68,6 +68,8 @@ int canrec(int argc, char **argv)
                         msg.can_id, msg.can_dlc,
                         msg.data[0], msg.data[1], msg.data[2], msg.data[3],
                         msg.data[4], msg.data[5], msg.data[6], msg.data[7]);
+		
+  		printf("expected id %d\r\n", expectedId);
 
                     // resync expectedId
                     expectedId = msg.data[0] + (msg.data[1] << 8) + (msg.data[2] << 16) + (msg.data[3] << 24);
