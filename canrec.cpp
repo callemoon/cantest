@@ -13,7 +13,7 @@ int canrec(int argc, char **argv)
     struct timeval timeout;
     int pass = 0;
     int fail = 0;
-    int printFrame = 100;
+    int printFrame = 1000;
     int receivedMessages = 0;
 
     timeout.tv_sec = 1;
