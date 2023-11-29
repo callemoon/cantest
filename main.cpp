@@ -29,6 +29,7 @@ int main(int argc, char**argv)
     {
         cansend(argc, argv);
     }
+    else
     if(!strcmp(argv[1], "burst"))
     {
         canburst(argc, argv);
